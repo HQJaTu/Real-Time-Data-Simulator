@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>rtdsim</AssemblyName>
+    <RootNamespace>RTDSimulator.Cli</RootNamespace>
+    <AssemblyVersion>0.5.2</AssemblyVersion>
+    <FileVersion>0.5.2</FileVersion>
+    <RepositoryUrl>https://github.com/Azure-Player/Real-Time-Data-Simulator/</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\RTDSimulator.Core\default-variables.toml" Link="variables.toml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RTDSimulator.Core\RTDSimulator.Core.csproj" />
+    <ProjectReference Include="..\RTDSimulator.EventHubs\RTDSimulator.EventHubs.csproj" />
+    <ProjectReference Include="..\RTDSimulator.ServiceBus\RTDSimulator.ServiceBus.csproj" />
+    <ProjectReference Include="..\RTDSimulator.Kusto\RTDSimulator.Kusto.csproj" />
+  </ItemGroup>
+
+</Project>

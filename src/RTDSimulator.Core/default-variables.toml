@@ -1,0 +1,41 @@
+# Default variable definitions for the Real-Time Data Simulator.
+#
+# Each [table] defines one variable; the table name is the token used in the
+# payload template, e.g. [UserId] is emitted for {{UserId}}. Names that contain
+# dots or parentheses must be quoted, e.g. ["DateTime.Now"].
+#
+# Supported types:
+#   randomInt    - integer in [min, max)  (max is exclusive)
+#   randomItem   - a random element of `items`
+#   indexedItem  - element of `items` chosen by message index (index % count)
+#   dateTimeNow  - current local date/time; optional `format` (default "O")
+#   literal      - the fixed string `value`
+
+[UserId]
+type = "randomInt"
+min = 5000
+max = 5100
+
+[ProductId]
+type = "randomInt"
+min = 700
+max = 999
+
+[Device]
+type = "randomItem"
+items = ["mobile", "tablet", "pc"]
+
+["DateTime.Now"]
+type = "dateTimeNow"
+
+["FuelType(MessageIndex)"]
+type = "indexedItem"
+items = [
+    "BIOMASS", "CCGT", "COAL", "INTELEC", "INTEW", "INTFR", "INTIFA2", "INTIRL",
+    "INTNED", "INTNEM", "INTNSL", "INTVKL", "NPSHYD", "NUCLEAR", "OCGT", "OIL",
+    "OTHER", "PS", "WIND",
+]
+
+[SettlementPeriod]
+type = "literal"
+value = "48"

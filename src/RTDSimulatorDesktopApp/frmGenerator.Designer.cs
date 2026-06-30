@@ -32,10 +32,6 @@ namespace RTDSimulatorDesktopApp
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmGenerator));
-            label1 = new Label();
-            label2 = new Label();
-            txtCnnStr = new TextBox();
-            txtEventHubName = new TextBox();
             label3 = new Label();
             txtPayload = new TextBox();
             btnRun = new Button();
@@ -48,8 +44,8 @@ namespace RTDSimulatorDesktopApp
             label8 = new Label();
             SettingsTotalMsgCount = new NumericUpDown();
             SettingsMsgPerBatchNumber = new NumericUpDown();
-            SettingsBatchesPerThreadNumber = new NumericUpDown();
-            SettingsThreadsNumber = new NumericUpDown();
+            SettingsBatchesPerSenderNumber = new NumericUpDown();
+            SettingsParallelismNumber = new NumericUpDown();
             statusStrip1 = new StatusStrip();
             statusBatches = new ToolStripStatusLabel();
             status = new ToolStripStatusLabel();
@@ -59,6 +55,8 @@ namespace RTDSimulatorDesktopApp
             loadMessageTemplateToolStripMenuItem = new ToolStripMenuItem();
             saveMessageTemplateToolStripMenuItem = new ToolStripMenuItem();
             saveAsToolStripMenuItem = new ToolStripMenuItem();
+            loadVariableDefinitionsToolStripMenuItem = new ToolStripMenuItem();
+            azureSignOutToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator1 = new ToolStripSeparator();
             exitToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
@@ -70,53 +68,23 @@ namespace RTDSimulatorDesktopApp
             lastErrorTextBox = new TextBox();
             groupBox3 = new GroupBox();
             btnAzureAuth = new Button();
+            cboTargetType = new ComboBox();
+            lblTargetType = new Label();
+            pnlParams = new TableLayoutPanel();
+            toolTip1 = new ToolTip(components);
+            chkVerifyIngestion = new CheckBox();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)SettingsWaitTimeSec).BeginInit();
             ((System.ComponentModel.ISupportInitialize)SettingsTotalMsgCount).BeginInit();
             ((System.ComponentModel.ISupportInitialize)SettingsMsgPerBatchNumber).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)SettingsBatchesPerThreadNumber).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)SettingsThreadsNumber).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)SettingsBatchesPerSenderNumber).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)SettingsParallelismNumber).BeginInit();
             statusStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
             SuspendLayout();
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(15, 35);
-            label1.Name = "label1";
-            label1.Size = new Size(157, 15);
-            label1.TabIndex = 0;
-            label1.Text = "Endpoint &Connection String:";
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(15, 97);
-            label2.Name = "label2";
-            label2.Size = new Size(139, 15);
-            label2.TabIndex = 1;
-            label2.Text = "&Topic / Event Hub Name:";
-            // 
-            // txtCnnStr
-            // 
-            txtCnnStr.Location = new Point(15, 53);
-            txtCnnStr.Name = "txtCnnStr";
-            txtCnnStr.Size = new Size(424, 23);
-            txtCnnStr.TabIndex = 2;
-            txtCnnStr.Text = "Endpoint=sb://****fkawjq507mc.servicebus.windows.net/;SharedAccessKeyName=key_0000;SharedAccessKey=****";
-            // 
-            // txtEventHubName
-            // 
-            txtEventHubName.Font = new Font("Courier New", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txtEventHubName.Location = new Point(15, 115);
-            txtEventHubName.Name = "txtEventHubName";
-            txtEventHubName.Size = new Size(424, 21);
-            txtEventHubName.TabIndex = 3;
-            txtEventHubName.Text = "es_08960000000000000000";
-            // 
+            //
             // label3
             // 
             label3.AutoSize = true;
@@ -148,7 +116,7 @@ namespace RTDSimulatorDesktopApp
             btnRun.ImageAlign = ContentAlignment.MiddleLeft;
             btnRun.ImageKey = "Visualpharm-Must-Have-Play.ico";
             btnRun.ImageList = imageList1;
-            btnRun.Location = new Point(900, 447);
+            btnRun.Location = new Point(900, 497);
             btnRun.Name = "btnRun";
             btnRun.Size = new Size(201, 54);
             btnRun.TabIndex = 6;
@@ -184,7 +152,7 @@ namespace RTDSimulatorDesktopApp
             label4.Name = "label4";
             label4.Size = new Size(398, 21);
             label4.TabIndex = 8;
-            label4.Text = "Threads   x   Batches   x   Messages   =   TOTAL Messages";
+            label4.Text = "Parallelism   x   Batches   x   Messages   =   TOTAL Messages";
             // 
             // groupBox1
             // 
@@ -194,8 +162,8 @@ namespace RTDSimulatorDesktopApp
             groupBox1.Controls.Add(label8);
             groupBox1.Controls.Add(SettingsTotalMsgCount);
             groupBox1.Controls.Add(SettingsMsgPerBatchNumber);
-            groupBox1.Controls.Add(SettingsBatchesPerThreadNumber);
-            groupBox1.Controls.Add(SettingsThreadsNumber);
+            groupBox1.Controls.Add(SettingsBatchesPerSenderNumber);
+            groupBox1.Controls.Add(SettingsParallelismNumber);
             groupBox1.Controls.Add(label4);
             groupBox1.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             groupBox1.Location = new Point(643, 279);
@@ -260,29 +228,29 @@ namespace RTDSimulatorDesktopApp
             SettingsMsgPerBatchNumber.Value = new decimal(new int[] { 1, 0, 0, 0 });
             SettingsMsgPerBatchNumber.ValueChanged += SettingsMsgPerBatchNumber_ValueChanged;
             // 
-            // SettingsBatchesPerThreadNumber
+            // SettingsBatchesPerSenderNumber
             // 
-            SettingsBatchesPerThreadNumber.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
-            SettingsBatchesPerThreadNumber.Location = new Point(106, 76);
-            SettingsBatchesPerThreadNumber.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
-            SettingsBatchesPerThreadNumber.Name = "SettingsBatchesPerThreadNumber";
-            SettingsBatchesPerThreadNumber.Size = new Size(76, 29);
-            SettingsBatchesPerThreadNumber.TabIndex = 13;
-            SettingsBatchesPerThreadNumber.TextAlign = HorizontalAlignment.Right;
-            SettingsBatchesPerThreadNumber.Value = new decimal(new int[] { 1, 0, 0, 0 });
-            SettingsBatchesPerThreadNumber.ValueChanged += SettingsBatchesPerThreadNumber_ValueChanged;
+            SettingsBatchesPerSenderNumber.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            SettingsBatchesPerSenderNumber.Location = new Point(106, 76);
+            SettingsBatchesPerSenderNumber.Maximum = new decimal(new int[] { 1000, 0, 0, 0 });
+            SettingsBatchesPerSenderNumber.Name = "SettingsBatchesPerSenderNumber";
+            SettingsBatchesPerSenderNumber.Size = new Size(76, 29);
+            SettingsBatchesPerSenderNumber.TabIndex = 13;
+            SettingsBatchesPerSenderNumber.TextAlign = HorizontalAlignment.Right;
+            SettingsBatchesPerSenderNumber.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            SettingsBatchesPerSenderNumber.ValueChanged += SettingsBatchesPerSenderNumber_ValueChanged;
             // 
-            // SettingsThreadsNumber
+            // SettingsParallelismNumber
             // 
-            SettingsThreadsNumber.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
-            SettingsThreadsNumber.Location = new Point(15, 76);
-            SettingsThreadsNumber.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
-            SettingsThreadsNumber.Name = "SettingsThreadsNumber";
-            SettingsThreadsNumber.Size = new Size(85, 29);
-            SettingsThreadsNumber.TabIndex = 11;
-            SettingsThreadsNumber.TextAlign = HorizontalAlignment.Right;
-            SettingsThreadsNumber.Value = new decimal(new int[] { 1, 0, 0, 0 });
-            SettingsThreadsNumber.ValueChanged += SettingsThreadsNumber_ValueChanged;
+            SettingsParallelismNumber.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold);
+            SettingsParallelismNumber.Location = new Point(15, 76);
+            SettingsParallelismNumber.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
+            SettingsParallelismNumber.Name = "SettingsParallelismNumber";
+            SettingsParallelismNumber.Size = new Size(85, 29);
+            SettingsParallelismNumber.TabIndex = 11;
+            SettingsParallelismNumber.TextAlign = HorizontalAlignment.Right;
+            SettingsParallelismNumber.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            SettingsParallelismNumber.ValueChanged += SettingsParallelismNumber_ValueChanged;
             // 
             // statusStrip1
             // 
@@ -324,7 +292,7 @@ namespace RTDSimulatorDesktopApp
             // 
             // FileMenu
             // 
-            FileMenu.DropDownItems.AddRange(new ToolStripItem[] { loadMessageTemplateToolStripMenuItem, saveMessageTemplateToolStripMenuItem, saveAsToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
+            FileMenu.DropDownItems.AddRange(new ToolStripItem[] { loadMessageTemplateToolStripMenuItem, saveMessageTemplateToolStripMenuItem, saveAsToolStripMenuItem, loadVariableDefinitionsToolStripMenuItem, azureSignOutToolStripMenuItem, toolStripSeparator1, exitToolStripMenuItem });
             FileMenu.Name = "FileMenu";
             FileMenu.Size = new Size(37, 20);
             FileMenu.Text = "&File";
@@ -352,6 +320,20 @@ namespace RTDSimulatorDesktopApp
             saveAsToolStripMenuItem.Size = new Size(186, 22);
             saveAsToolStripMenuItem.Text = "Save As...";
             saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
+            //
+            // loadVariableDefinitionsToolStripMenuItem
+            //
+            loadVariableDefinitionsToolStripMenuItem.Name = "loadVariableDefinitionsToolStripMenuItem";
+            loadVariableDefinitionsToolStripMenuItem.Size = new Size(186, 22);
+            loadVariableDefinitionsToolStripMenuItem.Text = "Load Variable Definitions...";
+            loadVariableDefinitionsToolStripMenuItem.Click += loadVariableDefinitionsToolStripMenuItem_Click;
+            //
+            // azureSignOutToolStripMenuItem
+            //
+            azureSignOutToolStripMenuItem.Name = "azureSignOutToolStripMenuItem";
+            azureSignOutToolStripMenuItem.Size = new Size(186, 22);
+            azureSignOutToolStripMenuItem.Text = "Azure: Sign out";
+            azureSignOutToolStripMenuItem.Click += azureSignOutToolStripMenuItem_Click;
             // 
             // toolStripSeparator1
             // 
@@ -383,19 +365,60 @@ namespace RTDSimulatorDesktopApp
             // groupBox2
             // 
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            groupBox2.Controls.Add(chkVerifyIngestion);
+            groupBox2.Controls.Add(pnlParams);
+            groupBox2.Controls.Add(lblTargetType);
+            groupBox2.Controls.Add(cboTargetType);
             groupBox2.Controls.Add(btnAzureAuth);
             groupBox2.Controls.Add(btnTestCnn);
-            groupBox2.Controls.Add(label1);
-            groupBox2.Controls.Add(txtCnnStr);
-            groupBox2.Controls.Add(label2);
-            groupBox2.Controls.Add(txtEventHubName);
             groupBox2.Location = new Point(643, 88);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(458, 185);
             groupBox2.TabIndex = 12;
             groupBox2.TabStop = false;
-            groupBox2.Text = "Destination: EventHub";
-            // 
+            groupBox2.Text = "Destination";
+            //
+            // lblTargetType
+            //
+            lblTargetType.AutoSize = true;
+            lblTargetType.Location = new Point(15, 28);
+            lblTargetType.Name = "lblTargetType";
+            lblTargetType.Size = new Size(48, 15);
+            lblTargetType.TabIndex = 0;
+            lblTargetType.Text = "&Service:";
+            //
+            // cboTargetType
+            //
+            cboTargetType.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboTargetType.FormattingEnabled = true;
+            cboTargetType.Location = new Point(75, 25);
+            cboTargetType.Name = "cboTargetType";
+            cboTargetType.Size = new Size(220, 23);
+            cboTargetType.TabIndex = 1;
+            cboTargetType.SelectedIndexChanged += cboTargetType_SelectedIndexChanged;
+            //
+            // chkVerifyIngestion
+            //
+            chkVerifyIngestion.AutoSize = true;
+            chkVerifyIngestion.Location = new Point(301, 27);
+            chkVerifyIngestion.Name = "chkVerifyIngestion";
+            chkVerifyIngestion.Size = new Size(110, 19);
+            chkVerifyIngestion.TabIndex = 8;
+            chkVerifyIngestion.Text = "Verify ingestion";
+            chkVerifyIngestion.UseVisualStyleBackColor = true;
+            //
+            // pnlParams
+            //
+            pnlParams.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            pnlParams.AutoScroll = true;
+            pnlParams.ColumnCount = 2;
+            pnlParams.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 175F));
+            pnlParams.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            pnlParams.Location = new Point(15, 54);
+            pnlParams.Name = "pnlParams";
+            pnlParams.Size = new Size(424, 84);
+            pnlParams.TabIndex = 2;
+            //
             // btnTestCnn
             // 
             btnTestCnn.Location = new Point(257, 141);
@@ -429,7 +452,7 @@ namespace RTDSimulatorDesktopApp
             btnCancel.ImageAlign = ContentAlignment.MiddleLeft;
             btnCancel.ImageKey = "Visualpharm-Must-Have-Stop.ico";
             btnCancel.ImageList = imageList1;
-            btnCancel.Location = new Point(693, 447);
+            btnCancel.Location = new Point(693, 497);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new Size(201, 54);
             btnCancel.TabIndex = 14;
@@ -454,7 +477,7 @@ namespace RTDSimulatorDesktopApp
             groupBox3.AutoSize = true;
             groupBox3.Controls.Add(lastErrorTextBox);
             groupBox3.Controls.Add(progressBar1);
-            groupBox3.Location = new Point(10, 507);
+            groupBox3.Location = new Point(10, 557);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(1100, 187);
             groupBox3.TabIndex = 13;
@@ -475,7 +498,7 @@ namespace RTDSimulatorDesktopApp
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1124, 716);
+            ClientSize = new Size(1124, 766);
             Controls.Add(groupBox3);
             Controls.Add(btnCancel);
             Controls.Add(btnPreview);
@@ -489,7 +512,7 @@ namespace RTDSimulatorDesktopApp
             Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             MainMenuStrip = menuStrip1;
-            MinimumSize = new Size(1140, 753);
+            MinimumSize = new Size(1140, 803);
             Name = "frmGenerator";
             StartPosition = FormStartPosition.CenterScreen;
             Tag = "Real-Time Data Simulator (for Windows)";
@@ -501,8 +524,8 @@ namespace RTDSimulatorDesktopApp
             ((System.ComponentModel.ISupportInitialize)SettingsWaitTimeSec).EndInit();
             ((System.ComponentModel.ISupportInitialize)SettingsTotalMsgCount).EndInit();
             ((System.ComponentModel.ISupportInitialize)SettingsMsgPerBatchNumber).EndInit();
-            ((System.ComponentModel.ISupportInitialize)SettingsBatchesPerThreadNumber).EndInit();
-            ((System.ComponentModel.ISupportInitialize)SettingsThreadsNumber).EndInit();
+            ((System.ComponentModel.ISupportInitialize)SettingsBatchesPerSenderNumber).EndInit();
+            ((System.ComponentModel.ISupportInitialize)SettingsParallelismNumber).EndInit();
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             menuStrip1.ResumeLayout(false);
@@ -517,26 +540,24 @@ namespace RTDSimulatorDesktopApp
 
         #endregion
 
-        private Label label1;
-        private Label label2;
-        private TextBox txtCnnStr;
-        private TextBox txtEventHubName;
         private Label label3;
         private TextBox txtPayload;
         private Button btnRun;
         private Label label4;
         private GroupBox groupBox1;
-        private NumericUpDown SettingsThreadsNumber;
+        private NumericUpDown SettingsParallelismNumber;
         private StatusStrip statusStrip1;
         private ToolStripStatusLabel statusBatches;
         private ToolStripStatusLabel status;
-        private NumericUpDown SettingsBatchesPerThreadNumber;
+        private NumericUpDown SettingsBatchesPerSenderNumber;
         private NumericUpDown SettingsTotalMsgCount;
         private NumericUpDown SettingsMsgPerBatchNumber;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem FileMenu;
         private ToolStripMenuItem loadMessageTemplateToolStripMenuItem;
         private ToolStripMenuItem saveMessageTemplateToolStripMenuItem;
+        private ToolStripMenuItem loadVariableDefinitionsToolStripMenuItem;
+        private ToolStripMenuItem azureSignOutToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem exitToolStripMenuItem;
         private GroupBox groupBox2;
@@ -555,5 +576,10 @@ namespace RTDSimulatorDesktopApp
         private ImageList imageList1;
         private Button btnTestCnn;
         private Button btnAzureAuth;
+        private ComboBox cboTargetType;
+        private Label lblTargetType;
+        private TableLayoutPanel pnlParams;
+        private ToolTip toolTip1;
+        private CheckBox chkVerifyIngestion;
     }
 }

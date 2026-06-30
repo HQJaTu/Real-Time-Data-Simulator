@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyVersion>0.5.2</AssemblyVersion>
+    <FileVersion>0.5.2</FileVersion>
+    <RepositoryUrl>https://github.com/Azure-Player/Real-Time-Data-Simulator/</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.18.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RTDSimulator.Core\RTDSimulator.Core.csproj" />
+  </ItemGroup>
+
+</Project>

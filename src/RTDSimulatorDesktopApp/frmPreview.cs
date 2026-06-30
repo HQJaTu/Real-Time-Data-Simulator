@@ -7,12 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using RTDSimulator.Core;
 
 namespace RTDSimulatorDesktopApp
 {
     public partial class frmPreview : Form
     {
-        public EventSender gen;
+        public PayloadGenerator gen;
 
         public frmPreview()
         {
