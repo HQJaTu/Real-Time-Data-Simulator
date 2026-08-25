@@ -1,0 +1,57 @@
+# Runs the xUnit test projects on every push to an open pull request.
+
+name: Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+  # Allows running the tests manually from the Actions tab.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to the same PR cancels the run still in flight for the previous one.
+concurrency:
+  group: unit-tests-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Unit Tests
+    # The solution contains RTDSimulatorDesktopApp, a WinForms project targeting
+    # net10.0-windows, so the whole solution only restores and builds on Windows.
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@9a946fdbd5fb07b82b2f5a4466058b876ab72bb2 # v5.3.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore src/RealTimeDataSimulator.sln
+
+      - name: Build
+        run: dotnet build src/RealTimeDataSimulator.sln --configuration Release --no-restore
+
+      # No LogFileName: both test projects write into the same results directory
+      # and a fixed name would make the second run overwrite the first one's trx.
+      - name: Test
+        run: >
+          dotnet test src/RealTimeDataSimulator.sln
+          --configuration Release
+          --no-build
+          --logger trx
+          --results-directory TestResults
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-results-${{ github.run_id }}
+          path: TestResults/
+          retention-days: 7
