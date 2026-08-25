@@ -1,0 +1,17 @@
+<Project>
+
+  <!--
+    Single source of truth for the product version. MSBuild imports this file into every
+    project under src/, so the individual .csproj files no longer carry their own copy.
+
+    This is the *released* version. It is bumped by .github/workflows/release-version.yaml
+    when a release is published in GitHub, so it lags the changelog's in-progress section
+    until that release actually happens.
+  -->
+  <PropertyGroup>
+    <VersionPrefix>0.6.0</VersionPrefix>
+    <AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
+    <FileVersion>$(VersionPrefix)</FileVersion>
+  </PropertyGroup>
+
+</Project>

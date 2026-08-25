@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.7.0] - Unreleased
 ### Added
 * Kusto connectors: optional **Ingestion mapping** parameter (`-p mapping=<name>`) referencing a JSON ingestion mapping on the table. Without a mapping, Kusto maps JSON to columns by name (case-sensitive), so mismatched field names silently ingest as null/blank rows; a mapping lets arbitrary field names land in the right columns.
 * Kusto ingestion error handling: payloads are validated as JSON before sending (malformed templates fail fast), and synchronously-reported ingestion failures (e.g. streaming schema mismatches) now surface as errors instead of being ignored. Added an opt-in post-run check for asynchronous (queued) failures — `--verify-ingestion` (CLI) / **Verify ingestion** (GUI) — which queries `.show ingestion failures` and reports them.

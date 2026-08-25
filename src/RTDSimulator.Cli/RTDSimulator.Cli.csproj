@@ -7,8 +7,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>rtdsim</AssemblyName>
     <RootNamespace>RTDSimulator.Cli</RootNamespace>
-    <AssemblyVersion>0.5.2</AssemblyVersion>
-    <FileVersion>0.5.2</FileVersion>
     <RepositoryUrl>https://github.com/Azure-Player/Real-Time-Data-Simulator/</RepositoryUrl>
   </PropertyGroup>
 

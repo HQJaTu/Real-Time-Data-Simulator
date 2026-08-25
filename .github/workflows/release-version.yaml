@@ -1,0 +1,115 @@
+# Stamps the version of a published GitHub release into the source tree:
+#   - src/Directory.Build.props   <VersionPrefix> (drives AssemblyVersion / FileVersion)
+#   - changelog.md                the in-progress section gets the version and release date
+# and commits the result back to the default branch.
+#
+# Note: the release tag points at the commit that was tagged, which is *before* this bump.
+# The bump therefore lands on the default branch after the release, not on the tag itself.
+
+name: Update Version on Release
+
+on:
+  release:
+    types: [published]
+  # Manual re-run / dry run, e.g. after fixing up a release by hand.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to stamp, e.g. 0.7.0 (or v0.7.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+# Never let two version bumps race each other onto the default branch.
+concurrency:
+  group: release-version
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    name: Update Version
+    # Pre-releases keep the numbering of the release they lead up to, so they must not
+    # bump the released version. Manual runs are always intentional, so they always apply.
+    if: github.event_name == 'workflow_dispatch' || github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Stamp version into sources
+        shell: pwsh
+        # The tag name is repository data, not trusted input: pass it through the
+        # environment rather than interpolating it into the script body.
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.event.release.tag_name }}
+          RELEASE_DATE: ${{ github.event.release.published_at }}
+        run: |
+          $tag = $env:RELEASE_TAG.Trim()
+          $bare = $tag -replace '^[vV]', ''
+          if ($bare -notmatch '^(\d+)\.(\d+)(?:\.(\d+))?$') {
+            throw "Tag '$tag' is not a plain version number (expected 0.7, 0.7.0, v0.7.0). Nothing was changed."
+          }
+          # AssemblyVersion needs all parts, so a two-part tag gets a .0 patch.
+          $patch = if ($Matches[3]) { $Matches[3] } else { '0' }
+          $version = "$($Matches[1]).$($Matches[2]).$patch"
+
+          $date = if ($env:RELEASE_DATE) {
+            [datetime]::Parse($env:RELEASE_DATE, [cultureinfo]::InvariantCulture).ToString('yyyy-MM-dd')
+          } else {
+            (Get-Date).ToString('yyyy-MM-dd')
+          }
+          Write-Host "Stamping version $version (released $date)"
+
+          # --- src/Directory.Build.props ---------------------------------------------
+          $propsPath = 'src/Directory.Build.props'
+          $props = Get-Content $propsPath -Raw
+          if ($props -notmatch '<VersionPrefix>[^<]*</VersionPrefix>') {
+            throw "No <VersionPrefix> element found in $propsPath."
+          }
+          $props = $props -replace '(?<=<VersionPrefix>)[^<]*(?=</VersionPrefix>)', $version
+          Set-Content -Path $propsPath -Value $props -NoNewline
+
+          # --- changelog.md ----------------------------------------------------------
+          # Matches the in-progress heading in either form -- "## [Unreleased]" or
+          # "## [0.7.0] - Unreleased" -- and leaves already-dated releases alone.
+          $changelogPath = 'changelog.md'
+          $changelog = Get-Content $changelogPath -Raw
+          $heading = [regex]'(?m)^##\s+\[(?:Unreleased\]|\d+\.\d+(?:\.\d+)?\]\s+-\s+Unreleased)\s*$'
+          # Re-running the job for a release that was already stamped must not append a
+          # second, empty section for the same version.
+          $alreadyDated = [regex]::IsMatch($changelog, "(?m)^##\s+\[$([regex]::Escape($version))\]\s+-\s+\d{4}-\d{2}-\d{2}\s*$")
+          if ($alreadyDated) {
+            Write-Host "$changelogPath already has a dated section for $version -- leaving it as is."
+          } elseif ($heading.IsMatch($changelog)) {
+            $replacement = "## [Unreleased]`n`n## [$version] - $date"
+            # Count 1: only the topmost in-progress section becomes this release.
+            $changelog = $heading.Replace($changelog, $replacement, 1)
+            Set-Content -Path $changelogPath -Value $changelog -NoNewline
+          } else {
+            Write-Warning "No in-progress section found in $changelogPath -- only the version was updated."
+          }
+
+          "Stamped version ``$version`` (released $date)." >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Commit and push
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.event.release.tag_name }}
+        run: |
+          $files = @('src/Directory.Build.props', 'changelog.md')
+          # --porcelain rather than "git diff --quiet": a legitimate non-zero exit code
+          # from git aborts the whole step under pwsh's error handling.
+          if (-not (git status --porcelain -- $files)) {
+            Write-Host "Sources already carry this version, nothing to commit."
+            "Sources already up to date -- no commit made." >> $env:GITHUB_STEP_SUMMARY
+            exit 0
+          }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- $files
+          git commit -m "chore: Set version to $($env:RELEASE_TAG) [skip ci]"
+          git push
